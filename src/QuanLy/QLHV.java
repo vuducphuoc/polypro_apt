@@ -902,6 +902,7 @@ public class QLHV extends JPanel {
 
                 DangNhapFrame.pnTKHV.refresh();
                 DangNhapFrame.pnQLHVKH.refresh();
+                DangNhapFrame.pnTHBĐ.refresh();
             }
         });
         // </editor-fold>
@@ -1966,10 +1967,12 @@ public class QLHV extends JPanel {
             return false;
         }
 
-        if (hocVienDAO.checkPhoneExistsInDb(txtSDT.getText())) {
-            JOptionPane.showMessageDialog(null, "Số điện thoại đã được sử dụng để đăng ký học!", "Cảnh báo", JOptionPane.WARNING_MESSAGE);
-            txtSDT.requestFocus();
-            return false;
+        if (flagSave == FLAG_INSERT) {
+            if (hocVienDAO.checkPhoneExistsInDb(txtSDT.getText())) {
+                JOptionPane.showMessageDialog(null, "Số điện thoại đã được sử dụng để đăng ký học!", "Cảnh báo", JOptionPane.WARNING_MESSAGE);
+                txtSDT.requestFocus();
+                return false;
+            }
         }
 
         if (txtEmail.getText().length() == 0) {
@@ -1999,7 +2002,7 @@ public class QLHV extends JPanel {
         }
 
         if (flagSave == FLAG_INSERT) {
-            if (hocVienDAO.checkHvExists(txtHoTen.getText(), rdoNam.isSelected(), dateHelper.castDateForm1ToForm2(txtNgaySinh.getText()))) {
+            if (hocVienDAO.checkHvExists(txtHoTen.getText().trim(), rdoNam.isSelected(), dateHelper.castDateForm1ToForm2(txtNgaySinh.getText()))) {
                 String hoTen = txtHoTen.getText();
                 String gtinh = rdoNam.isSelected() == true ? "Nam" : "Nữ";
                 String ngaySinh = txtNgaySinh.getText();
