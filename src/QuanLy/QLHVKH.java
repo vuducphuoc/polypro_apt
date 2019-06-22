@@ -631,7 +631,7 @@ public class QLHVKH extends JPanel {
         }
 
         if (!strDiem.matches("^\\d*\\.*\\d*$")) {
-            JOptionPane.showMessageDialog(null, "Điểm phải là số", "Cảnh báo", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Điểm phải là số từ 0 đến 10", "Cảnh báo", JOptionPane.WARNING_MESSAGE);
             if (hvkh.getDiem() == -1) {
                 model.setValueAt("-", row, col);
             } else {
