@@ -98,11 +98,12 @@ public class QLHV extends JPanel {
     DateHelper dateHelper = new DateHelper();
 
     final int ROLE_TRUONG_PHONG = 1;
-    final int FLAG_DEFAULT = 0;
+
+    public final int FLAG_DEFAULT = 0;
     final int FLAG_INSERT = 1;
     final int FLAG_UPDATE = 2;
     final int ADD_KH = 3;
-    int flagSave = FLAG_DEFAULT;
+    public int flagSave = FLAG_DEFAULT;
 
     final int SEARCH = 1;
     final int NO_SEARCH = 0;
@@ -2376,11 +2377,7 @@ public class QLHV extends JPanel {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     unlockFormInfo();
-                    btnDelete.setEnabled(false);
-                    btnCancel.setEnabled(true);
-                    btnSave.setEnabled(true);
-                    btnNew.setEnabled(false);
-                    btnUpdate.setEnabled(false);
+                    buttonStatus1();
                     txtHoTen.requestFocus();
                     flagSave = 2;
                 }
@@ -2525,6 +2522,37 @@ public class QLHV extends JPanel {
     // <editor-fold defaultstate="collapsed" desc="REFRESH ">
     public void refresh() {
         try {
+            //load dữ liệu vào cbx năm
+            loadDataToCbxYear();
+
+            //load dữ liệu lên table
+            if (cbxNam.getItemCount() != 0) {
+                loadDataToTable((int) cbxNam.getSelectedItem());
+
+                //load học viên đầu tiên lên form
+                if (listHocVien.size() > 0) {
+                    hvSelected = listHocVien.get(0);
+
+                    loadDataToForm();
+
+                    lblKhoaHocCua.setText(hvSelected.getHoTen() + " đã tham gia khóa học");
+
+                    try {
+                        loadDataToTblKH();
+
+                        loadDataToCbxKhoaHoc();
+                    } catch (SQLException ex) {
+                        Logger.getLogger(QLHV.class.getName()).log(Level.SEVERE, null, ex);
+                    } catch (ParseException ex) {
+                        Logger.getLogger(QLHV.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+
+                    tblHocVien.setRowSelectionInterval(0, 0);
+
+                    indexHvSelectedInTable = 0;
+                }
+            }
+
             loadDataToTblKH();
             loadDataToCbxKhoaHoc();
         } catch (SQLException ex) {
@@ -2532,6 +2560,8 @@ public class QLHV extends JPanel {
         } catch (ParseException ex) {
             Logger.getLogger(QLHV.class.getName()).log(Level.SEVERE, null, ex);
         }
+
+        System.out.println("đã làm mới màn hình quản lý học viên");
     }
     // </editor-fold>
 

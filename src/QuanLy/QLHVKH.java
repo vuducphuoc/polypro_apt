@@ -35,7 +35,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.EventObject;
 import java.util.List;
@@ -118,14 +117,19 @@ public class QLHVKH extends JPanel {
 
             @Override
             public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
-                JLabel c = (JLabel) super.prepareRenderer(renderer, row, column);
-                if (column == 2 || column == 3) {
-                    c.setHorizontalAlignment(JLabel.LEFT);
-                } else {
-                    c.setHorizontalAlignment(JLabel.CENTER);
+                try {
+                    JLabel c = (JLabel) super.prepareRenderer(renderer, row, column);
+                    if (column == 2 || column == 3) {
+                        c.setHorizontalAlignment(JLabel.LEFT);
+                    } else {
+                        c.setHorizontalAlignment(JLabel.CENTER);
 
+                    }
+                    return c;
+                } catch (Exception e) {
+                    Logger.getLogger(QLHVKH.class.getName()).log(Level.SEVERE, null, e);
                 }
-                return c;
+                return null;
             }
         };
 
@@ -617,6 +621,7 @@ public class QLHVKH extends JPanel {
         } catch (Exception e) {
         }
 
+        System.out.println("đã làm mới màn hình quản lý học viên của khóa học");
     }
 
     private boolean checkValidate() {

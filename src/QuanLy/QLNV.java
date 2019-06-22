@@ -35,6 +35,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -316,7 +317,7 @@ public class QLNV extends JPanel {
 
         gbc.gridy = 3;
         pnInformation.add(txtID, gbc);
-        
+
         gbc.gridy = 4;
         pnInformation.add(lblHoTen, gbc);
 
@@ -896,6 +897,8 @@ public class QLNV extends JPanel {
             }
         });
         // </editor-fold>
+
+        refresh30s();
     }
 
     // <editor-fold defaultstate="collapsed" desc="TẠO MÃ NHÂN VIÊN">
@@ -1071,13 +1074,13 @@ public class QLNV extends JPanel {
             txtHoTen.requestFocus();
             return false;
         }
-        
+
         if (!txtHoTen.getText().matches("^[A-Za-zÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚÝàáâãèéêìíòóôõùúýĂăĐđĨĩŨũƠơƯưẠ-ỹ\\s\']{5,100}$")) {
             JOptionPane.showMessageDialog(null, "Vui lòng nhập họ tên đầy đủ, không chứa số và các ký tự đặc biệt \n, . / ; < > ? : \" { } - = _ + ` ~ ! @ $ % ^ & * ( ) \\ |", "Cảnh báo", JOptionPane.WARNING_MESSAGE);
             txtHoTen.requestFocus();
             return false;
         }
-        
+
         if (pwfMatKhau.getPassword().length == 0) {
             JOptionPane.showMessageDialog(null, "Vui lòng nhật mật khẩu!", "Cảnh báo", JOptionPane.WARNING_MESSAGE);
             pwfMatKhau.requestFocus();
@@ -1095,7 +1098,6 @@ public class QLNV extends JPanel {
             pwfXacNhanMatKhau.requestFocus();
             return false;
         }
-
 
         if (txtEmail.getText().length() == 0) {
             JOptionPane.showMessageDialog(null, "Vui lòng nhập email!", "Cảnh báo", JOptionPane.WARNING_MESSAGE);
@@ -1115,7 +1117,7 @@ public class QLNV extends JPanel {
                 txtEmail.requestFocus();
                 return false;
             }
-            
+
             try {
                 if (mailHelper.checkEmail(txtEmail.getText()).equals("false")) {
                     JOptionPane.showMessageDialog(null, "Email không tồn tại. Vui lòng kiểm tra lại!", "Cảnh báo", JOptionPane.WARNING_MESSAGE);
@@ -1248,16 +1250,29 @@ public class QLNV extends JPanel {
     private void updateNV() throws SQLException {
         if (checkInfo()) {
             try {
+                NhanVien truongPhong = nhanVienDAO.checkTpExists();
+
                 if (nvSelected.getVaiTro() == 1) {
-                    update();
+                    if (rdoNV.isSelected() == true) {
+                        int choose = JOptionPane.showConfirmDialog(null, "Ông " + truongPhong.getHoTen() + " đang là trưởng phòng.\nBạn có muốn chuyển Ông " + truongPhong.getHoTen() + " thành nhân viên không?", "Hỏi", JOptionPane.YES_OPTION);
 
-                    loadDataToTable();
-                    lockFormInfo();
-                    buttonStatus0();
-                    flagSave = 0;
+                        if (choose == JOptionPane.NO_OPTION || choose == JOptionPane.CLOSED_OPTION) {
+                            return;
+                        }
+
+                        update();
+
+                        loadDataToTable();
+                        lockFormInfo();
+                        buttonStatus0();
+                        flagSave = 0;
+
+                        JOptionPane.showMessageDialog(null, "Tài khoản của bạn đã bị thay đổi quyền thành Nhân viên. Vui lòng đăng nhập lại để sử dụng", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+                        ChaoJDialog.frLogin.setVisible(true);
+                        ChaoJDialog.frLogin.progressBar.setValue(0);
+                        DangNhapFrame.mainFrame.setVisible(false);
+                    }
                 } else {
-                    NhanVien truongPhong = nhanVienDAO.checkTpExists();
-
                     if (truongPhong != null && rdoTP.isSelected()) {
                         int choose = JOptionPane.showConfirmDialog(null, "Ông " + truongPhong.getHoTen() + " đang là trưởng phòng.\nBạn có muốn tiếp tục đổi trưởng phòng mới không?", "Hỏi", JOptionPane.YES_OPTION);
 
@@ -1364,11 +1379,7 @@ public class QLNV extends JPanel {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     unlockFormInfo();
-                    btnDelete.setEnabled(false);
-                    btnCancel.setEnabled(true);
-                    btnSave.setEnabled(true);
-                    btnNew.setEnabled(false);
-                    btnUpdate.setEnabled(false);
+                    buttonStatusSave();
                     txtHoTen.requestFocus();
                     flagSave = 2;
                 }
@@ -1388,7 +1399,7 @@ public class QLNV extends JPanel {
                 mess = "Bạn có muốn bỏ qua thao tác cập nhật thông tin nhân viên không?";
                 break;
         }
-        
+
         int choose = JOptionPane.showConfirmDialog(null, mess, "Hỏi", JOptionPane.YES_NO_OPTION);
 
         if (choose == JOptionPane.NO_OPTION || choose == JOptionPane.CLOSED_OPTION) {
@@ -1470,6 +1481,62 @@ public class QLNV extends JPanel {
                 Logger.getLogger(QLNV.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
+    }
+    // </editor-fold>
+
+    // <editor-fold defaultstate="collapsed" desc="REFRESH ">
+    private void refresh() {
+        try {
+            //Load dữ liệu lên table
+            loadDataToTable();
+        } catch (SQLException ex) {
+            Logger.getLogger(QLNV.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        if (listNhanVien.size() > 0) {
+            nvSelected = listNhanVien.get(0);
+            loadDataToForm();
+
+            tblNhanVien.setRowSelectionInterval(0, 0);
+
+            indexNvSelectedInTable = 0;
+        }
+    }
+    // </editor-fold>
+
+    // <editor-fold defaultstate="collapsed" desc="REFRESH 30S 1 LẦN ">
+    private void refresh30s() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                boolean flagLogout = false;
+                while (doneLoad) {
+                    if (flagSave == FLAG_DEFAULT) {
+                        refresh();
+                    }
+
+                    try {
+                        NhanVien nv = nhanVienDAO.getByID(DangNhapFrame.nvLogin.getID());
+
+                        if (nv.getVaiTro() != DangNhapFrame.nvLogin.getVaiTro() && flagLogout == false) {
+                            JOptionPane.showMessageDialog(null, "Tài khoản của bạn đã bị thay đổi quyền. Vui lòng đăng nhập lại để sử dụng", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+                            ChaoJDialog.frLogin.setVisible(true);
+                            ChaoJDialog.frLogin.progressBar.setValue(0);
+                            DangNhapFrame.mainFrame.setVisible(false);
+                            flagLogout = true;
+                        }
+                    } catch (SQLException ex) {
+                        Logger.getLogger(QLNV.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+
+                    try {
+                        Thread.sleep(30000);
+                    } catch (InterruptedException ex) {
+                        Logger.getLogger(QLNV.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+            }
+        }).start();
     }
     // </editor-fold>
 }
