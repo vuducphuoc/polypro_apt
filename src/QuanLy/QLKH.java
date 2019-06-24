@@ -542,7 +542,6 @@ public class QLKH extends JPanel {
         loadDataToCbx();
         loadDataToCbxNam();
         loadDataToTable();
-        System.out.println("đã làm mới màn hình quản lý khóa học");
     }
 
     private void reload() {
@@ -919,7 +918,7 @@ public class QLKH extends JPanel {
     }
 
     //<editor-fold defaultstate="collapsed" desc="Component">
-    public int choose = 0;
+    int choose = 0;
     int index = 0;
     int stt = -1;
     String messCancel = "";
