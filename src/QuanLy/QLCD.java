@@ -589,7 +589,6 @@ public class QLCD extends JPanel {
 
     public void refresh() {
         loadDataToTable();
-        System.out.println("đã làm mới màn hình quản lý chuyên đề");
     }
 
     // CLEAR FORM
@@ -911,7 +910,7 @@ public class QLCD extends JPanel {
     // </editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Component">
-    public int choose;
+    int choose;
     int stt = -1;
     int index = 0;
     int indexSearch = 0;
